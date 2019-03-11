@@ -542,12 +542,14 @@ class KafkaClient(object):
         # we will need to call send_pending_requests()
         # to trigger network I/O
         future = self._conns[node_id].send(request, blocking=False)
+        log.debug("client_async future id: %s", id(future))
 
         # Wakeup signal is useful in case another thread is
         # blocked waiting for incoming network traffic while holding
         # the client lock in poll().
         self.wakeup()
 
+        log.debug("client_async future id: %s", id(future))
         return future
 
     def poll(self, timeout_ms=None, future=None):

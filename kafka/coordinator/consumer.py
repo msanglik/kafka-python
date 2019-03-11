@@ -616,8 +616,14 @@ class ConsumerCoordinator(BaseCoordinator):
                   offsets, self.group_id, node_id)
 
         future = Future()
+        log.debug("_send_offset_commit_request() future %s, future id: %s", future, id(future))
+
         _f = self._client.send(node_id, request)
+        log.debug("_send_offset_commit_request future %s, future id: %s, _f: %s, _f id: %s", future, id(future), _f, id(_f))
+
         _f.add_callback(self._handle_offset_commit_response, offsets, future, time.time())
+        log.debug("finished add_callback, _send_offset_commit_request future: %s, future id: %s, _f: %s, _f id: %s", future, id(future), _f, id(_f))
+
         _f.add_errback(self._failed_request, node_id, request, future)
         return future
 
@@ -625,7 +631,7 @@ class ConsumerCoordinator(BaseCoordinator):
         # TODO look at adding request_latency_ms to response (like java kafka)
         self.consumer_sensors.commit_latency.record((time.time() - send_time) * 1000)
         unauthorized_topics = set()
-
+        log.debug("future: %s, response: %s", future, response)
         for topic, partitions in response.topics:
             for partition, error_code in partitions:
                 tp = TopicPartition(topic, partition)

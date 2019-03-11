@@ -48,10 +48,12 @@ class Future(object):
     def add_callback(self, f, *args, **kwargs):
         if args or kwargs:
             f = functools.partial(f, *args, **kwargs)
+            log.debug("f.func: %s, f.args: %s, f.keywords: %s", f.func, f.args, f.keywords)
         if self.is_done and not self.exception:
             self._call_backs('callback', [f], self.value)
         else:
             self._callbacks.append(f)
+        log.debug("self: %s, self's id: %s, f: %s, f's id: %s", self, id(self), f, id(f))
         return self
 
     def add_errback(self, f, *args, **kwargs):
@@ -74,8 +76,10 @@ class Future(object):
         return self
 
     def _call_backs(self, back_type, backs, value):
+        log.debug('self: %s, back_type: %s, backs: %s, value: %s', self, back_type, backs, value)
         for f in backs:
             try:
+                log.debug("f: %s, f's id: %s, value: %s", f, id(f), value)
                 f(value)
             except Exception as e:
                 log.exception('Error processing %s', back_type)
